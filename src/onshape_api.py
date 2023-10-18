@@ -286,6 +286,38 @@ class OnshapeAPI:
 
         return new_url
 
+
+    def get_featurescript(self, url):
+        """
+        Get the feature script of the part studio
+        args: 
+            url: onshape url of the design
+        returns: 
+            featscript: a json file of featurescript
+        """
+        did, wid, eid, _ = self._url_elem(url) 
+        
+        url_ext = "/api/partstudios/d/did/w/wid/e/eid/featurescript"
+        fixed_url = self._build_url(url_ext, did, wid, eid) 
+
+        headers = {
+                "Accept": "application/json;charset=UTF-8; qs=0.09", 
+                "Content-Type": "application/json"
+            }
+        params, payload = {}, {}
+        method = "POST"
+        response = self.client.api_client.request(method, url=self.base + fixed_url, 
+                                                    query_params=params, 
+                                                    headers=headers, 
+                                                    body=payload)
+
+        data = json.loads(response.data)   
+        with open("featurescript.json", "w") as outfile:
+            json.dump(data, outfile)
+
+        return data
+
+
     def export_stl(self, url, filename):
         """
         args: 

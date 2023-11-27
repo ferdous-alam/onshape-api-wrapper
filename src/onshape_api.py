@@ -186,7 +186,7 @@ class OnshapeAPI:
         new_branch_url = f'https://cad.onshape.com/documents/{did}/w/{branch_wid}/e/{eid}'
         return new_branch_url
 
-    def get_features(self, url):
+    def get_features(self, url, raw_data=False):
         """
         Get the feature list of the part studio
         args: 
@@ -218,8 +218,12 @@ class OnshapeAPI:
             feat_type = item['message']['featureType']
             feat_id = item['message']['featureId']
             feats[feat_name] = {'type': feat_type, 'id': feat_id} 
-        return feats
-    
+        
+        if raw_data:
+            return data
+        else:
+            return feats
+            
     def delete_feature(self, url, feats, feat_to_delete): 
         """
         deletes features from Onshape url using feature name
@@ -412,3 +416,24 @@ class OnshapeAPI:
 
         else: 
             return None
+
+    def rollback_feat(self, url, rollback_index):
+        did, wid, eid, _ = self._url_elem(url)
+        url_ext = "/api/partstudios/d/did/w/wid/e/eid"
+        fixed_url = self._build_url(url_ext, did, wid, eid) 
+
+        feat_url = self.base + fixed_url + "/features/rollback"
+        method = "POST"
+        headers={
+                "Accept": "application/json;charset=UTF-8; qs=0.09"
+            }
+        params = {}
+        payload = {
+                "rollbackIndex": rollback_index
+            }
+        response = self.client.api_client.request(method, url=feat_url, 
+                                                query_params=params, 
+                                                headers=headers, 
+                                                body=payload)
+
+        return response
